@@ -1,9 +1,12 @@
 handle_query:
   description: |
     Process the user message: {message}
+    Current date: {current_date}
+    Current time: {current_time}
 
     For appointment-related queries (containing words like schedule, appointment, meeting, etc.),
     delegate to the Appointment Management Specialist.
+    When handling appointments, use the current date ({current_date}) and time ({current_time}) as reference for determining upcoming appointments.
 
     For all other queries (weather, general information, web searches),
     delegate to the General Information Assistant.
@@ -12,3 +15,4 @@ handle_query:
     - General Information Assistant
     - Appointment Management Specialist
   expected_output: "A clear and helpful response to the user's query."
+  inputs: ['message', 'current_date', 'current_time']

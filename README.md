@@ -72,11 +72,12 @@ crewai run
 
 ### Example Queries
 
-#### General Knowledge
+#### General Knowledge / Web Search
 
 ```
+What is the latest news in Japan
 What is the capital of Japan?
-Tell me about the history of pizza
+What is the current Bitcoin price?
 Who invented the telephone?
 ```
 

@@ -4,6 +4,7 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 from dotenv import load_dotenv
 from telegram_bot_crewai.crew import TelegramBotCrew
+from datetime import datetime
 
 # Enable logging
 logging.basicConfig(
@@ -42,9 +43,16 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         # Get the crew
         crew = crew_instance.crew()
         
-        # Prepare inputs
+        # Get current date and time
+        current_datetime = datetime.now()
+        current_date = current_datetime.strftime('%Y-%m-%d')
+        current_time = current_datetime.strftime('%H:%M')
+        
+        # Prepare inputs with task variables
         inputs = {
-            'message': user_message
+            'message': user_message,
+            'current_date': current_date,
+            'current_time': current_time
         }
         logger.info(f"Starting crew execution with inputs: {inputs}")
         
