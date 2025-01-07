@@ -1,0 +1,14 @@
+route_query:
+  description: 'Analyze the user message: {message}'
+  expected_output: 'A clear decision indicating whether this is a general or appointment query.'
+  agent: router
+
+handle_general_query:
+  description: 'Process general user message: {message}'
+  expected_output: "A comprehensive response to the user's query."
+  agent: general_agent
+
+handle_appointment:
+  description: 'Process appointment-related message: {message}'
+  expected_output: 'A confirmation of the appointment action taken, or a list of current appointments.'
+  agent: appointment_agent

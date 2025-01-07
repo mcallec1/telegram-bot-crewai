@@ -1,0 +1,24 @@
+[project]
+name = "telegram_bot_crewai"
+version = "0.1.0"
+description = "Telegram-Bot-CrewAI using crewAI"
+authors = [{ name = "Your Name", email = "you@example.com" }]
+requires-python = ">=3.10,<=3.13"
+dependencies = [
+    "crewai[tools]>=0.86.0,<1.0.0",
+    "python-telegram-bot>=20.0",
+    "google-search-results>=2.4.2",
+    "requests>=2.31.0",
+    "python-dotenv>=1.0.0"
+]
+
+[project.scripts]
+telegram_bot_crewai = "telegram_bot_crewai.main:run"
+run_crew = "telegram_bot_crewai.main:run"
+train = "telegram_bot_crewai.main:train"
+replay = "telegram_bot_crewai.main:replay"
+test = "telegram_bot_crewai.main:test"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
