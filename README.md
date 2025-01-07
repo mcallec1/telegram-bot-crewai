@@ -35,7 +35,7 @@ The system uses CrewAI's agent framework for task delegation and execution, with
 1. **Clone the repository**:
 
 ```bash
-git clone [your-repo-url]
+git clone https://github.com/mcallec1/telegram_bot_crewai.git
 cd telegram-bot-crewai
 ```
 

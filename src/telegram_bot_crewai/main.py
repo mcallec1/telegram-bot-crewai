@@ -2,7 +2,7 @@
 import sys
 import warnings
 from telegram_bot_crewai.bot import main as bot_main
-from telegram_bot_crewai.crew import TelegramBotCrewai
+from telegram_bot_crewai.crew import TelegramBotCrew
 
 warnings.filterwarnings("ignore", category=SyntaxWarning, module="pysbd")
 
@@ -25,7 +25,7 @@ def train():
         "topic": "AI LLMs"
     }
     try:
-        TelegramBotCrewai().crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)
+        TelegramBotCrew().crew().train(n_iterations=int(sys.argv[1]), filename=sys.argv[2], inputs=inputs)
 
     except Exception as e:
         raise Exception(f"An error occurred while training the crew: {e}")
@@ -35,7 +35,7 @@ def replay():
     Replay the crew execution from a specific task.
     """
     try:
-        TelegramBotCrewai().crew().replay(task_id=sys.argv[1])
+        TelegramBotCrew().crew().replay(task_id=sys.argv[1])
 
     except Exception as e:
         raise Exception(f"An error occurred while replaying the crew: {e}")
@@ -48,7 +48,7 @@ def test():
         "topic": "AI LLMs"
     }
     try:
-        TelegramBotCrewai().crew().test(n_iterations=int(sys.argv[1]), openai_model_name=sys.argv[2], inputs=inputs)
+        TelegramBotCrew().crew().test(n_iterations=int(sys.argv[1]), openai_model_name=sys.argv[2], inputs=inputs)
 
     except Exception as e:
         raise Exception(f"An error occurred while replaying the crew: {e}")

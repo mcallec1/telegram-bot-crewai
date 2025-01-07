@@ -1,117 +1,73 @@
-from crewai import Agent, Task, Crew, Process
+from crewai import Agent, Crew, Process, Task
+from crewai.project import CrewBase, agent, crew, task
 from telegram_bot_crewai.tools.weather_tool import WeatherTool
 from telegram_bot_crewai.tools.web_search_tool import WebSearchTool
 from telegram_bot_crewai.tools.appointment_tool import AppointmentTool
-import yaml
+from langchain_openai import ChatOpenAI
 import logging
+from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-class TelegramBotCrewai:
-	"""TelegramBotCrewai crew"""
+@CrewBase
+class TelegramBotCrew:
+	"""Telegram Bot crew for handling queries and appointments"""
 
-	def __init__(self):
-		self.load_config()
-		self.create_agents()
-		self.create_tasks()
+	agents_config = 'config/agents.yaml'
+	tasks_config = 'config/tasks.yaml'
 
-	def load_config(self):
-		"""Load agent and task configurations from YAML files."""
-		with open('src/telegram_bot_crewai/config/agents.yaml', 'r') as f:
-			self.agents_config = yaml.safe_load(f)
-		with open('src/telegram_bot_crewai/config/tasks.yaml', 'r') as f:
-			self.tasks_config = yaml.safe_load(f)
-
-	def create_agents(self):
-		"""Create the agents with their respective tools."""
-		self.router_agent = Agent(
-			role=self.agents_config['router']['role'],
-			goal=self.agents_config['router']['goal'],
-			backstory=self.agents_config['router']['backstory'],
-			allow_delegation=False
+	@agent
+	def general_agent(self) -> Agent:
+		return Agent(
+			config=self.agents_config['general_agent'],
+			tools=[
+				WeatherTool(),
+				WebSearchTool()
+			],
+			allow_delegation=False,
+			verbose=True
 		)
 
-		self.general_agent = Agent(
-			role=self.agents_config['general_agent']['role'],
-			goal=self.agents_config['general_agent']['goal'],
-			backstory=self.agents_config['general_agent']['backstory'],
-			tools=[WeatherTool(), WebSearchTool()],
-			allow_delegation=False
-		)
-
-		self.appointment_agent = Agent(
-			role=self.agents_config['appointment_agent']['role'],
-			goal=self.agents_config['appointment_agent']['goal'],
-			backstory=self.agents_config['appointment_agent']['backstory'],
+	@agent
+	def appointment_agent(self) -> Agent:
+		return Agent(
+			config=self.agents_config['appointment_agent'],
 			tools=[AppointmentTool()],
-			allow_delegation=False
+			allow_delegation=True,
+			verbose=True
 		)
 
-	def create_tasks(self):
-		"""Create the tasks for each agent."""
-		logger.info("Creating route query task")
-		self.route_task = Task(
-			description=self.tasks_config['route_query']['description'],
-			agent=self.router_agent,
-			expected_output=self.tasks_config['route_query']['expected_output']
+	@task
+	def handle_query(self) -> Task:
+		return Task(
+			config=self.tasks_config['handle_query'],
 		)
 
-		logger.info("Creating general query task")
-		self.general_task = Task(
-			description=self.tasks_config['handle_general_query']['description'],
-			agent=self.general_agent,
-			expected_output=self.tasks_config['handle_general_query']['expected_output']
-		)
-
-		logger.info("Creating appointment task")
-		self.appointment_task = Task(
-			description=self.tasks_config['handle_appointment']['description'],
-			agent=self.appointment_agent,
-			expected_output=self.tasks_config['handle_appointment']['expected_output']
-		)
-
-	def crew(self, inputs=None):
-		"""Create and return the crew with all agents and tasks."""
-		logger.info("Creating crew with all agents and tasks")
-		
-		self.inputs = inputs or {}
-		
-		# First, get the routing decision
-		routing_crew = Crew(
-			agents=[self.router_agent],
-			tasks=[self.route_task],
-			process=Process.sequential
-		)
-		logger.info("Starting routing crew...")
-		route_result = routing_crew.kickoff(inputs=self.inputs)
-		route_decision = str(route_result).lower()
-		logger.info(f"Routing decision: {route_decision}")
-		
-		# Based on the routing decision, create a crew with the appropriate agent and task
-		selected_crew = None
-		if "general" in route_decision:
-			logger.info("Routing to general agent")
-			selected_crew = Crew(
-				agents=[self.general_agent],
-				tasks=[self.general_task],
-				process=Process.sequential
+	@crew
+	def crew(self) -> Crew:
+		"""Creates the Telegram Bot crew with manager-based delegation"""
+	
+		try:
+			return Crew(
+				agents=self.agents,
+				tasks=self.tasks,
+				manager_llm=ChatOpenAI(
+					temperature=0,
+					model="gpt-4o-mini",
+					verbose=True
+				),
+				process=Process.hierarchical,
+				verbose=True,
 			)
+		except Exception as e:
+			logger.error(f"Error creating crew: {str(e)}")
+			raise
+
+	# def format_response(self, response: Optional[str]) -> str:
+	# 	"""Format the crew's response for Telegram"""
+	# 	if not response:
+	# 		return "Sorry, I couldn't process your request."
 		
-		elif "appointment" in route_decision:
-			logger.info("Routing to appointment agent")
-			selected_crew = Crew(
-				agents=[self.appointment_agent],
-				tasks=[self.appointment_task],
-				process=Process.sequential
-			)
-		
-		else:
-			# Default to general agent if routing is unclear
-			logger.info("No clear routing decision, defaulting to general agent")
-			selected_crew = Crew(
-				agents=[self.general_agent],
-				tasks=[self.general_task],
-				process=Process.sequential
-			)
-		
-		return selected_crew
+	# 	# Clean up the response by removing any "Final Answer:" prefix
+	# 	response = response.replace("Final Answer:", "").strip()
+	# 	return response

@@ -3,7 +3,7 @@ import logging
 from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 from dotenv import load_dotenv
-from telegram_bot_crewai.crew import TelegramBotCrewai
+from telegram_bot_crewai.crew import TelegramBotCrew
 
 # Enable logging
 logging.basicConfig(
@@ -37,7 +37,10 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     try:
         # Create crew instance
         logger.info("Creating CrewAI instance...")
-        crew_instance = TelegramBotCrewai()
+        crew_instance = TelegramBotCrew()
+        
+        # Get the crew
+        crew = crew_instance.crew()
         
         # Prepare inputs
         inputs = {
@@ -45,15 +48,48 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
         }
         logger.info(f"Starting crew execution with inputs: {inputs}")
         
-        # Get the response from the crew
-        crew = crew_instance.crew(inputs=inputs)
+        # Execute the crew with inputs
         result = crew.kickoff(inputs=inputs)
-        logger.info("Crew execution completed")
-        logger.debug(f"Result: {result}")
+        logger.info(f"Crew execution completed. Raw result: {result}")
         
-        # Convert CrewOutput to string and send the response back to the user
+        # Extract the response from the result
         response_text = str(result)
+        logger.info(f"Response after str conversion: {response_text}")
+        
+        # Clean up the response
+        if "## Final Answer:" in response_text:
+            response_text = response_text.split("## Final Answer:")[-1].strip()
+            logger.info(f"Response after Final Answer extraction: {response_text}")
+        else:
+            logger.warning("No '## Final Answer:' found in response")
+        
+        # Remove any remaining markdown headers and clean up formatting
+        cleaned_lines = []
+        for line in response_text.splitlines():
+            if not line.startswith('#'):
+                # Remove asterisks and clean up appointment formatting
+                line = line.replace('**', '')
+                if line.strip().startswith('-'):
+                    # Format appointment lines
+                    line = line.strip()[1:].strip()  # Remove the leading dash
+                cleaned_lines.append(line.strip())
+        
+        # Join lines and format the final message
+        if "appointment" in user_message.lower():
+            response_text = "Here are your scheduled appointments:\n\n"
+            response_text += '\n'.join(cleaned_lines)
+        else:
+            response_text = '\n'.join(cleaned_lines)
+        
+        logger.info(f"Response after markdown cleanup: {response_text}")
+        
+        if not response_text or not response_text.strip():
+            logger.warning("No valid response found in the result")
+            response_text = "Sorry, I couldn't process your request."
+        
+        logger.info(f"Final response to be sent: {response_text}")
         await update.message.reply_text(response_text)
+        logger.info("Response sent to Telegram successfully")
     except Exception as e:
         logger.error(f"Error processing message: {e}", exc_info=True)
         await update.message.reply_text("Sorry, I encountered an error. Please try again.")

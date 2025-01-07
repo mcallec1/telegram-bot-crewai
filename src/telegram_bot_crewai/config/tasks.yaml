@@ -1,14 +1,14 @@
-route_query:
-  description: 'Analyze the user message: {message}'
-  expected_output: 'A clear decision indicating whether this is a general or appointment query.'
-  agent: router
+handle_query:
+  description: |
+    Process the user message: {message}
 
-handle_general_query:
-  description: 'Process general user message: {message}'
-  expected_output: "A comprehensive response to the user's query."
-  agent: general_agent
+    For appointment-related queries (containing words like schedule, appointment, meeting, etc.),
+    delegate to the Appointment Management Specialist.
 
-handle_appointment:
-  description: 'Process appointment-related message: {message}'
-  expected_output: 'A confirmation of the appointment action taken, or a list of current appointments.'
-  agent: appointment_agent
+    For all other queries (weather, general information, web searches),
+    delegate to the General Information Assistant.
+
+    Note: Use exact role names for delegation:
+    - General Information Assistant
+    - Appointment Management Specialist
+  expected_output: "A clear and helpful response to the user's query."
