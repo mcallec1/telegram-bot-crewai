@@ -13,14 +13,14 @@ This project is a Telegram bot powered by OpenAI's GPT models and CrewAI's agent
 
 ### 🔍 Router Agent
 
-Analyzes user queries to determine which specialized agent should handle the task.
+Analyses user queries to determine which specialised agent should handle the task.
 
 ### 🤖 Specialized Agents
 
 - **General Agent**: Handles general-purpose queries and information retrieval
 - **Appointment Agent**: Manages all appointment-related operations
 
-The system uses CrewAI's agent framework for task delegation and execution, with YAML-based configuration for easy customization.
+The system uses CrewAI's agent framework for task delegation and execution, with YAML-based configuration for easy customisation.
 
 ## ⚙️ Setup Instructions
 
@@ -67,7 +67,7 @@ crewai run
 
 ### Basic Commands
 
-- **/start**: Initialize the bot
+- **/start**: Initialise the bot
 - **/help**: View available commands
 
 ### Example Queries
