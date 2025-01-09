@@ -1,18 +1,25 @@
 handle_query:
-  description: |
+  description: >
     Process the user message: {message}
     Current date: {current_date}
     Current time: {current_time}
 
-    For appointment-related queries (containing words like schedule, appointment, meeting, etc.),
-    delegate to the Appointment Management Specialist.
-    When handling appointments, use the current date ({current_date}) and time ({current_time}) as reference for determining upcoming appointments.
+    Task: Analyze the user's message and delegate to the appropriate specialist.
 
-    For all other queries (weather, general information, web searches),
-    delegate to the General Information Assistant.
+    Delegation Rules:
+    1. For appointment-related queries (schedule, appointment, meeting):
+       - Delegate to: "Appointment Management Specialist"
+       - Include current date/time for context
 
-    Note: Use exact role names for delegation:
-    - General Information Assistant
+    2. For general queries (weather, web search, information):
+       - Delegate to: "General Information Assistant"
+       - Include any relevant search terms or context
+
+    Available Specialists:
     - Appointment Management Specialist
+    - General Information Assistant
   expected_output: "A clear and helpful response to the user's query."
-  inputs: ['message', 'current_date', 'current_time']
+  variables:
+    - message
+    - current_date
+    - current_time
